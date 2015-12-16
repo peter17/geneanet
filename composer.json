@@ -1,0 +1,15 @@
+{
+    "name": "mqu/geneanet",
+    "description": "php classes for Geneanet web site reading (genealogy)",
+    "authors": [
+        {
+            "name": "Marc Quinton",
+            "email": "m.quinton@gmail.com"
+        }
+    ],
+    "require": {
+    },
+    "autoload": {
+        "psr-0": { "" : "lib/" }
+    }
+}
