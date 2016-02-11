@@ -21,6 +21,7 @@ define("SECTION_NOTES", "notes");
 define("SECTION_SOURCES", "sources");
 define("SECTION_RELATIONSHIPS", "relationships");
 define("SECTION_FAMILY_NOTES", "family-notes");
+define("SECTION_FAMILY_TREE_PREVIEW", "family-tree-preview");
 
 
 class GeneanetEntryParser
@@ -46,11 +47,13 @@ class GeneanetEntryParser
         }
 
         # non "mobile version" page
+        /* FIXME Not working, maybe Geneanet change this system ?
         if (!preg_match('#This is the Mobile version of the GeneaNet web site. Click here to go to the regular version.#im', $data_html)) {
             error_log("# ERR : html page not in mobile version ($url)\n");
             return false;
         }
-        $div = $html->find('div#tree_content h2,ul,p,table');
+         */
+        $div = $html->find('div#tree_content h1,h2,ul,p,table');
 
         $section = SECTION_INFO;
         foreach ($div as $e) {
@@ -79,24 +82,24 @@ class GeneanetEntryParser
                 elseif (preg_match('/Notes/i', $e->plaintext)) {
                     # printf("# match notes\n");
                     $section = SECTION_NOTES;
-                } #elseif(preg_match('/Famil*y.*note/i', $e->plaintext)){
-                # 	printf("# match Family notes\n");
-                # 	$section = SECTION_FAMILY_NOTES;
-                # }
-        
-                elseif (preg_match('/Sources/i', $e->plaintext)) {
+                } elseif (preg_match('/Family Note/i', $e->plaintext)) {
+                    # printf("# match Family notes\n");
+                    $section = SECTION_FAMILY_NOTES;
+                } elseif (preg_match('/Sources/i', $e->plaintext)) {
                     # printf("# match sources\n");
                     $section = SECTION_SOURCES;
-                } # elseif(preg_match('/Relationships/i', $e->plaintext)){
-                #	# printf("# match sources\n");
-                #	$section = SECTION_RELATIONSHIPS;
+                } elseif (preg_match('/Family Tree Preview/i', $e->plaintext)) {
+                    # printf("# match Family notes\n");
+                    $section = SECTION_FAMILY_TREE_PREVIEW;
+                } # else if(preg_match('/Relationships/i', $e->plaintext)){
+                #    # printf("# match sources\n");
+                #    $section = SECTION_RELATIONSHIPS;
                 #}
                 
                 # default section
-                elseif ($section == 'info')
+                elseif ($section == 'info') {
                     $person = $this->parse_info($person, $e);
-
-                # elseif($section != 'info') {
+                } # else if($section != 'info') {
                 else {
                     # TODO : Family Tree Preview
                     error_log(sprintf(
@@ -152,6 +155,9 @@ class GeneanetEntryParser
                     case SECTION_FAMILY_NOTES:
                         $person = $this->parse_family_notes($person, $e);
                         break;
+                    case SECTION_FAMILY_TREE_PREVIEW:
+                        $person = $this->parse_family_tree_preview($person, $e);
+                        break;
                     case SECTION_SOURCES:
                         $person = $this->parse_sources($person, $e);
                         break;
@@ -173,24 +179,24 @@ class GeneanetEntryParser
         # printf("code : %s\n", $html->innertext);
         
         /* content :
-		 * ul
-		 *   li : union [parents]
-		 *   ul
-		 *    li : <img gender> <a href="">child1</a>
-		 *    li : <img gender> <a href="">child2</a> with ...
-		 *   /ul
-		 * /ul
-		 * 
-		 * plaintext :
-		 *  - Married [date], [place], to [person] 1967 (Parents : )  with   
-		 *    - [person] [date]
-		 *    - [person] [date]
-		 * 
-		 *  exception :
-		 * 
-		 *   Married to x x with 
-		 *    - x x
-		 */
+         * ul
+         *   li : union [parents]
+         *   ul
+         *    li : <img gender> <a href="">child1</a>
+         *    li : <img gender> <a href="">child2</a> with ...
+         *   /ul
+         * /ul
+         * 
+         * plaintext :
+         *  - Married [date], [place], to [person] 1967 (Parents : )  with   
+         *    - [person] [date]
+         *    - [person] [date]
+         * 
+         *  exception :
+         * 
+         *   Married to x x with 
+         *    - x x
+         */
          
          // TODO : get extra information for unions (date and place).
         
@@ -250,12 +256,23 @@ class GeneanetEntryParser
 
     public function parse_family_notes($person, $html)
     {
-        printf("# family_notes (%s)\n", $html->tag);
+        //error_log(sprintf("# family_notes (%s)", $html->tag));
         if (strlen(trim($html->plaintext)) == 0) {
             return $person;
         }
-        error_log("# TODO : need to complete parse_family_notes() method");
-        $person->push('familly-notes', $this->encode($html->plaintext));
+        //error_log("# TODO : need to complete parse_family_notes() method");
+        $person->push('family-notes', $this->encode($html->plaintext));
+        return $person;
+    }
+
+    public function parse_family_tree_preview($person, $html)
+    {
+        //error_log(sprintf("# family_tree_preview (%s)", $html->tag));
+        if (strlen(trim($html->plaintext)) == 0) {
+            return $person;
+        }
+        // error_log("# TODO : need to complete parse_family_tree_preview() method");
+        $person->push('family-tree-preview', $this->encode($html->plaintext));
         return $person;
     }
 
@@ -356,7 +373,7 @@ class GeneanetEntryParser
         # <img src="http://static.geneanet.org/arbre/img/man.png" alt="H" title="H" />&nbsp;
         # <a href="mq31?lang=fr;pz=marc;nz=quinton;ocz=0;templ=mobile;m=P;v=jean+marie+louis+pierre;o=i">Jean Marie Louis Pierre</a>
         # <a href="mq31?lang=fr;pz=marc;nz=quinton;ocz=0;templ=mobile;m=N;v=quinton;o=i">QUINTON</a>
-        if ($html->tag == 'h2') {
+        if ($html->tag == 'h1') {
             # gender (sex)
             if ($img = $html->find('img', 0)) {
                 $person->gender = strtoupper($img->title);
@@ -396,31 +413,31 @@ class GeneanetEntryParser
                             'place' => null
                         );
                 } # Died - [place]
-                elseif (preg_match('/^Died\s+-\s*(.*)/i', $txt, $values)) {
+                elseif (preg_match('/^(?:Died|Deceased)\s+-\s*(.*)/i', $txt, $values)) {
                     $person->birth = array(
                             'date'  => null,
                             'place' => trim($this->encode($values[1]))
                         );
-                } # Died [date] - [place], at ...
-                elseif (preg_match('/^Died (.*?) - (.*?) , age at/i', $txt, $values)) {
+                } # (?:Died|Deceased) [date] - [place], at ...
+                elseif (preg_match('/^(?:Died|Deceased) (.*?) - (.*?) , age at/i', $txt, $values)) {
                     $person->death = array(
                             'date'  => strtolower(trim($this->encode($values[1]))),
                             'place' => trim($this->encode($values[2]))
                         );
-                } # Died [date] - [place]
-                elseif (preg_match('/^Died (.*?) - (.*?)/i', $txt, $values)) {
+                } # (?:Died|Deceased) [date] - [place]
+                elseif (preg_match('/^(?:Died|Deceased) (.*?) - (.*?)/i', $txt, $values)) {
                     $person->death = array(
                             'date'  => strtolower(trim($this->encode($values[1]))),
                             'place' => trim($this->encode($values[2]))
                         );
-                } # Died [date] , age at death: 44 years old
-                elseif (preg_match('/^Died (.*?) , age at/i', $txt, $values)) {
+                } # (?:Died|Deceased) [date] , age at death: 44 years old
+                elseif (preg_match('/^(?:Died|Deceased) (.*?) , age at/i', $txt, $values)) {
                     $person->death = array(
                             'date'  => strtolower(trim($this->encode($values[1]))),
                             'place' => null
                         );
-                } # Died
-                elseif (preg_match('/^Died\s*$/i', $txt, $values)) {
+                } # (?:Died|Deceased)
+                elseif (preg_match('/^(?:Died|Deceased)\s*$/i', $txt, $values)) {
                     $person->death = array(
                             'status' => 'died',
                             'date'  => null,
@@ -493,9 +510,9 @@ class GeneanetEntryParser
         while ($p->tag != 'root') {
             if ($full && isset($p->class)) {
                 $list[] = sprintf("%s.%s", $p->tag, $p->class);
-            } elseif ($full && isset($p->id))
+            } elseif ($full && isset($p->id)) {
                 $list[] = sprintf("%s#%s", $p->tag, $p->id);
-            else {
+            } else {
                 $list[] = $p->tag;
             }
 
