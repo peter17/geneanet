@@ -12,9 +12,6 @@ class GeneanetServer
     protected $login;
     protected $passwd;
 
-    protected $id;
-    protected $idt;
-
     protected $curl; # handle IO with curl library
 
 
@@ -52,7 +49,7 @@ class GeneanetServer
             "nologin"    => 1,
         );
         $url = 'http://www.geneanet.org/';
-        $data = $this->post($url, $args);
+        $this->post($url, $args);
     }
     
     
@@ -64,7 +61,7 @@ class GeneanetServer
         
     }
 
-    public function last_error()
+    public function lastError()
     {
         return $this->error;
     }
@@ -84,8 +81,8 @@ class GeneanetServer
         printf("%s\n", $msg);
     }
     
-    public function set_proxy($proxy)
+    public function setProxy($proxy)
     {
-        $this->curl->set_proxy($proxy);
+        $this->curl->setProxy($proxy);
     }
 }

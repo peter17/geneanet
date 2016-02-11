@@ -10,7 +10,7 @@ $config = new Config();
 $geneanet = new GeneanetServer();
 
 if (!$geneanet->login($config->get('connexion/user'), $config->get('connexion/passwd'))) {
-    printf($geneanet->last_error() . "\n");
+    printf($geneanet->lastError() . "\n");
     exit(0);
 }
 
@@ -22,9 +22,9 @@ if (isset($argv[1])) {
 
 
 $grabber = new Grabber($geneanet);
-$grabber->set_delay($config->get('grabber/delay'));
+$grabber->setDelay($config->get('grabber/delay'));
 if ($config->get('connexion/proxy') != '') {
-    $grabber->set_proxy($config->get('connexion/proxy'));
+    $grabber->setProxy($config->get('connexion/proxy'));
 }
 
 $test = 'single';
@@ -32,49 +32,49 @@ $test = 'single';
 switch($test) {
 
     case 'single':
-        $p = $grabber->grab_single($url);
+        $p = $grabber->grabSingle($url);
         # print_r($p);
         echo utf8_decode($p);
         break;
 
     case 'ascendants':
-        $p = $grabber->grab_single($url);
-        $list = $grabber->grab_ascendants($p, $level = 15);
+        $p = $grabber->grabSingle($url);
+        $list = $grabber->grabAscendants($p, $level = 15);
         break;
 
     case 'descendants':
-        $p = $grabber->grab_single($url);
-        $grabber->grab_descendants($p, $level = 14);
+        $p = $grabber->grabSingle($url);
+        $grabber->grabDescendants($p, $level = 14);
         break;
 
     case 'siblings':
-        $p = $grabber->grab_single($url);
-        printf("siblings of : %s\n", utf8_decode($p->quick_display()));
-        $list = $grabber->grab_siblings($p);
+        $p = $grabber->grabSingle($url);
+        printf("siblings of : %s\n", utf8_decode($p->quickDisplay()));
+        $list = $grabber->grabSiblings($p);
         foreach ($list as $p) {
-            printf(" - %s\n", utf8_decode($p->quick_display()));
+            printf(" - %s\n", utf8_decode($p->quickDisplay()));
         }
         break;
         
     case 'half-siblings':
-        $p = $grabber->grab_single($url);
-        printf("half-siblings of : %s\n", utf8_decode($p->quick_display()));
-        $list = $grabber->grab_half_siblings($p);
+        $p = $grabber->grabSingle($url);
+        printf("half-siblings of : %s\n", utf8_decode($p->quickDisplay()));
+        $list = $grabber->grabHalfSiblings($p);
         foreach ($list as $p) {
-            printf(" - %s\n", utf8_decode($p->quick_display()));
+            printf(" - %s\n", utf8_decode($p->quickDisplay()));
         }
         break;
         
     case 'unions':
 
-        $p = $grabber->grab_single($url);
+        $p = $grabber->grabSingle($url);
 
-        $unions = $grabber->grab_unions_and_childs($p);
-        printf("Unions with %s\n", utf8_decode($p->quick_display()));
+        $unions = $grabber->grabUnionsAndChilds($p);
+        printf("Unions with %s\n", utf8_decode($p->quickDisplay()));
         foreach ($unions as $u) {
-            printf("- union : %s\n", utf8_decode($u['spouse']->quick_display()));
+            printf("- union : %s\n", utf8_decode($u['spouse']->quickDisplay()));
             foreach ($u['childs'] as $c) {
-                printf("  - %s\n", utf8_decode($c->quick_display()));
+                printf("  - %s\n", utf8_decode($c->quickDisplay()));
             }
         }
         break;

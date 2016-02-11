@@ -12,7 +12,7 @@ $config = new Config();
 $geneanet = new GeneanetServer();
 
 if (!$geneanet->login($config->get('connexion/user'), $config->get('connexion/passwd'))) {
-    printf($geneanet->last_error() . "\n");
+    printf($geneanet->lastError() . "\n");
     exit(0);
 }
 
@@ -23,9 +23,9 @@ if (isset($argv[1])) {
 }
 
 $grabber = new Grabber($geneanet);
-$grabber->set_delay($config->get('grabber/delay'));
+$grabber->setDelay($config->get('grabber/delay'));
 if ($config->get('connexion/proxy') != '') {
-    $grabber->set_proxy($config->get('connexion/proxy'));
+    $grabber->setProxy($config->get('connexion/proxy'));
 }
 
 $test = 'descendants';
@@ -33,18 +33,18 @@ $test = 'descendants';
 switch($test) {
 
     case 'single':
-        $p = $grabber->grab_single($url);
+        $p = $grabber->grabSingle($url);
         echo utf8_decode($p);
         break;
 
     case 'ascendants':
-        $p = $grabber->grab_single($url);
-        $grabber->grab_ascendants($p, $level = 3);
+        $p = $grabber->grabSingle($url);
+        $grabber->grabAscendants($p, $level = 3);
         break;
 
     case 'descendants':
-        $p = $grabber->grab_single($url);
-        $grabber->grab_descendants($p, $level = 2);
+        $p = $grabber->grabSingle($url);
+        $grabber->grabDescendants($p, $level = 2);
         break;
 
 }

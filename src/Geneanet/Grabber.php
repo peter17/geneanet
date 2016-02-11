@@ -23,12 +23,12 @@ class Grabber
         $this->url = new URL();
     }
 
-    public function grab_single($url)
+    public function grabSingle($url)
     {
 
-        $url = $this->url->enforce_params($url, $this->geneanet_args);
+        $url = $this->url->enforceParams($url, $this->geneanet_args);
 
-        $html = $this->url_grab_cached($url);
+        $html = $this->urlGrabCached($url);
         
         if ($html == false) {
             return false;
@@ -40,77 +40,76 @@ class Grabber
         return $person;
     }
 
-    public function grab_descendants($p, $level = 3, $indent = 0)
+    public function grabDescendants($person, $level = 3, $indent = 0)
     {
         
-        # printf("# grab_descendants(%s, %s)\n", $level, utf8_decode($p->name()));
+        # printf("# grabDescendants(%s, %s)\n", $level, utf8_decode($person->name()));
 
         if ($level == 0) {
             return;
         }
 
-        $unions = $this->grab_unions($p);
-        $p->set('unions', $unions);
+        $unions = $this->grabUnions($person);
+        $person->set('unions', $unions);
 
         foreach ($unions as $union) {
-            foreach ($union['childs'] as $c) {
-                # printf("  - %s\n", utf8_decode($c->name()));
+            foreach ($union['childs'] as $child) {
+                # printf("  - %s\n", utf8_decode($child->name()));
                 #printf("# %s - %s\n",
                 #   str_repeat("   - ", $indent),
-                #   utf8_decode($c->quick_display())
+                #   utf8_decode($child->quickDisplay())
                 #	);
-                $this->grab_descendants($c, $level-1, $indent+1);
+                $this->grabDescendants($child, $level-1, $indent+1);
             }
         }
     }
 
-    public function grab_ascendants($p, $level = 3)
+    public function grabAscendants($person, $level = 3)
     {
         
-        # printf("# grab_parents(%s) %s\n", $level, $->quick_display());
+        # printf("# grabParents(%s) %s\n", $level, $person->quickDisplay());
 
         if ($level == 0) {
             return;
         }
 
-        $parents = $p->parents;
+        $parents = $person->parents;
         $_parents = array();
         
         if (isset($parents[0]['url'])) {
-            $url = $this->make_url($p->url, $parents[0]);
-            $p1 = $this->grab_single($url);
-            $_parents[0] = $p1;
-            $this->grab_ascendants($p1, $level-1);
+            $url = $this->makeUrl($person->url, $parents[0]);
+            $person1 = $this->grabSingle($url);
+            $_parents[0] = $person1;
+            $this->grabAscendants($person1, $level-1);
         }
         if (isset($parents[1]['url'])) {
-            $url = $this->make_url($p->url, $parents[1]);
-            $p1 = $this->grab_single($url);
-            $_parents[1] = $p1;
-            $this->grab_ascendants($p1, $level-1);
+            $url = $this->makeUrl($person->url, $parents[1]);
+            $person1 = $this->grabSingle($url);
+            $_parents[1] = $person1;
+            $this->grabAscendants($person1, $level-1);
         }
         printf(
             " %s - (%d) %s\n",
             str_repeat("   ", $level),
             $level,
-            utf8_decode($p->quick_display())
+            utf8_decode($person->quickDisplay())
         );
 
-        $p->set('parents', $_parents);
+        $person->set('parents', $_parents);
 
     }
     
-    public function grab_unions($p)
+    public function grabUnions($person)
     {
-        return $this->grab_unions_and_childs($p);
+        return $this->grabUnionsAndChilds($person);
     }
 
-    public function grab_unions_and_childs($p)
+    public function grabUnionsAndChilds($person)
     {
         
-        # printf("# grab_unions_and_childs(%s) / %s\n", utf8_decode($p->name()), $p->url);
+        # printf("# grabUnionsAndChilds(%s) / %s\n", utf8_decode($person->name()), $person->url);
 
-        $list = array();
-        $unions = $p->unions;
+        $unions = $person->unions;
         $_unions = array();
 
         foreach ($unions as $u) {
@@ -118,15 +117,15 @@ class Grabber
             if ($u['url'] == null) {
                 continue;
             }
-            $url = $this->make_url($p->url, $u);
-            $_union['self'] = $p;
-            $_union['spouse'] = $this->grab_single($url);
+            $url = $this->makeUrl($person->url, $u);
+            $_union['self'] = $person;
+            $_union['spouse'] = $this->grabSingle($url);
             $_union['childs'] = array();
             
             if (isset($u['childs'])) {
                 foreach ($u['childs'] as $c) {
-                    $url = $this->make_url($p->url, $c);
-                    $_union['childs'][] = $this->grab_single($url);
+                    $url = $this->makeUrl($person->url, $c);
+                    $_union['childs'][] = $this->grabSingle($url);
                 }
             }
             
@@ -136,50 +135,50 @@ class Grabber
         return $_unions;
     }
 
-    public function grab_siblings($p)
+    public function grabSiblings($person)
     {
         
-        # printf("# grab_siblings(%s) / %s\n", utf8_decode($p->name()), $p->url);
+        # printf("# grabSiblings(%s) / %s\n", utf8_decode($person->name()), $person->url);
 
         $list = array();
-        $siblings = $p->siblings;
+        $siblings = $person->siblings;
 
         foreach ($siblings as $s) {
             if ($s['url'] == null) {
                 continue;
             }
-            $url = $this->make_url($p->url, $s);
-            $list[] = $this->grab_single($url);
+            $url = $this->makeUrl($person->url, $s);
+            $list[] = $this->grabSingle($url);
         }
         
         return $list;
     }
 
-    public function grab_half_siblings($p)
+    public function grabHalfSiblings($person)
     {
         
-        # printf("# grab_half_siblings(%s) / %s\n", utf8_decode($p->name()), $p->url);
+        # printf("# grabHalfSiblings(%s) / %s\n", utf8_decode($person->name()), $person->url);
 
         $list = array();
-        $siblings = $p->half_siblings;
+        $siblings = $person->half_siblings;
 
         foreach ($siblings as $s) {
             if ($s['url'] == null) {
                 continue;
             }
-            $url = $this->make_url($p->url, $s);
-            $list[] = $this->grab_single($url);
+            $url = $this->makeUrl($person->url, $s);
+            $list[] = $this->grabSingle($url);
         }
         
         return $list;
     }
 
-    protected function make_url($url, $p)
+    protected function makeUrl($url, $person)
     {
-        return sprintf('%s%s', $this->url->base($url), $p['url']);
+        return sprintf('%s%s', $this->url->base($url), $person['url']);
     }
 
-    protected function url_grab_cached($url)
+    protected function urlGrabCached($url)
     {
 
         $md5 = md5($url);
@@ -189,14 +188,14 @@ class Grabber
             return file_get_contents($cache);
         }
 
-        $html = $this->url_grab($url);
+        $html = $this->urlGrab($url);
 
         file_put_contents("var/cache/" . $md5 . '.html', $html);
 
         return $html;
     }
 
-    protected function url_grab($url)
+    protected function urlGrab($url)
     {
 
         # printf("# grab ($url) : %s\n", $url);
@@ -205,7 +204,7 @@ class Grabber
             $html = $this->geneanet->get($url);
             $this->delay();
             if ($html !== false) {
-                if (! $this->check_incorrect($html)) {
+                if (! $this->checkIncorrect($html)) {
                     return $html;
                 }
 
@@ -225,7 +224,7 @@ class Grabber
         return $html;
     }
 
-    protected function check_incorrect($html)
+    protected function checkIncorrect($html)
     {
         if (preg_match('#<h1>Incorrect request</h1>#i', $html)) {
             return true;
@@ -238,9 +237,9 @@ class Grabber
         return $this->parser->parse($html, $url);
     }
 
-    public function set_proxy($proxy)
+    public function setProxy($proxy)
     {
-        $this->geneanet->set_proxy($proxy);
+        $this->geneanet->setProxy($proxy);
     }
     
     protected function delay($sec = null)
@@ -252,7 +251,7 @@ class Grabber
     }
     
     /* won't go under 1 second between each request */
-    public function set_delay($sec)
+    public function setDelay($sec)
     {
         if ($sec<1) {
             $sec = 1;

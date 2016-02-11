@@ -82,7 +82,7 @@ class Person
         return $this->first . " " . $this->last;
     }
 
-    public function quick_display()
+    public function quickDisplay()
     {
         return sprintf(
             "[%s-%s] %s [%s] / %s",
@@ -108,6 +108,7 @@ class Person
     {
         $this->args[$key][] = $value;
     }
+    /*
     public function parent_add($value)
     {
         $this->push('parents', $value);
@@ -132,6 +133,7 @@ class Person
     {
         $this->push('unions', $value);
     }
+     */
 
     public function __toString()
     {
@@ -204,7 +206,7 @@ class Person
         return $txt;
     }
 
-    public function to_html()
+    public function toHtml()
     {
         $txt =  sprintf("> %s : <b>%s %s</b><br>\n", $this->gender, $this->first, $this->last);
 

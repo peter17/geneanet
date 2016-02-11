@@ -19,7 +19,7 @@ class Config
 
     public function __construct()
     {
-        $this->auto_load();
+        $this->autoload();
         
         if ($this->cnf == false) {
             throw new Exception("Config::__construct() : no configuration file found.");
@@ -33,7 +33,7 @@ class Config
      *  ./config.ini
      *  ./config.ini.default
      */
-    protected function auto_load()
+    protected function autoload()
     {
         
         $home_cnf = sprintf("%s/.config/geneanet.ini", getenv('HOME'));

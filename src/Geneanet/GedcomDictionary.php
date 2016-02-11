@@ -45,7 +45,7 @@ class GedcomDictionary
     {
     }
     
-    public function add($type, $p, $key)
+    public function add($type, $person, $key)
     {
         
         // we can insert only ONE value with $key (this is a uniq primary key)
@@ -53,11 +53,11 @@ class GedcomDictionary
             return $this->keys[$type][$key];
         }
 
-        $this->check_type($type);
+        $this->checkType($type);
         $id = count($this->dict[$type])+1;
-        $id = $this->make_id($type, $id);
+        $id = $this->makeId($type, $id);
         
-        $this->dict[$type][$id] = $p;
+        $this->dict[$type][$id] = $person;
         $this->keys[$type][$key] = $id;
 
         return $id;
@@ -65,7 +65,7 @@ class GedcomDictionary
 
     public function get($type, $id)
     {
-        $this->check_type($type);
+        $this->checkType($type);
         if ($this->_isset($type, $id)) {
             return $this->dict[$type][$id];
         }
@@ -82,12 +82,12 @@ class GedcomDictionary
         return isset($this->dict[$type][$id]);
     }
 
-    public function search($p)
+    public function search($person)
     {
         throw new Exception("to be done");
     }
     
-    protected function check_type($type)
+    protected function checkType($type)
     {
         switch($type){
             case INDIVIDUALS:
@@ -100,7 +100,7 @@ class GedcomDictionary
         }
     }
     
-    protected function make_id($type, $id)
+    protected function makeId($type, $id)
     {
         return sprintf("%s%s", $this->prefix[$type], $id);
     }

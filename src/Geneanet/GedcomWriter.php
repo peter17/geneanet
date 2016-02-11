@@ -19,11 +19,11 @@ namespace Geneanet;
  * 
  * 		...
  * 
- *    	$p = $grabber->grab_single($url);
- *		$grabber->grab_ascendants($p, $level=3);
+ *    	$person = $grabber->grabSingle($url);
+ *		$grabber->grabAscendants($person, $level=3);
  * 
  *		$writer = new GedcomWriter($config);
- *		echo $writer->write($p);  # will output GEDCOM data.
+ *		echo $writer->write($person);  # will output GEDCOM data.
  * 
  */
 
@@ -48,10 +48,10 @@ class GedcomWriter
     }
     
     // build dictionnary
-    public function build($p)
+    public function build($person)
     {
         
-        if (is_array($p)) {
+        if (is_array($person)) {
             return false;
         }
 
@@ -60,58 +60,58 @@ class GedcomWriter
         // step 3 : NOTES
         // step 4 : SOURCES
         
-        $this->build_individual($p);
-        $this->build_families($p);
-        // $this->display_individual($p);
+        $this->buildIndividual($person);
+        $this->buildFamilies($person);
+        // $this->displayIndividual($person);
     }
 
     // build individual dictionnary
-    public function build_individual($p)
+    public function buildIndividual($person)
     {
         
-        if (is_array($p)) {
+        if (is_array($person)) {
             return false;
         }
 
-        $this->dict_add_indiv($p);
+        $this->dictAddIndiv($person);
 
-        foreach ($p->unions as $union) {
+        foreach ($person->unions as $union) {
             //spouse
             if (isset($union['spouse'])) {
-                $this->build_individual($union['spouse']);
+                $this->buildIndividual($union['spouse']);
             }
             
             // childs
             if (isset($union['childs'])) {
                 foreach ($union['childs'] as $c) {
-                    $this->build_individual($c);
+                    $this->buildIndividual($c);
                 }
             }
         }
     }
 
     // build families dictionnary
-    public function build_families($p)
+    public function buildFamilies($person)
     {
         
-        if (is_array($p)) {
+        if (is_array($person)) {
             return false;
         }
-        $unions = &$p->get('unions');
+        $unions = &$person->get('unions');
         foreach ($unions as $idx => $union) {
-            # printf("# build_families(%s)\n", $p->name());
+            # printf("# buildFamilies(%s)\n", $person->name());
             //print_r($unions);
             //spouse
             $fam_id = null;
             if (isset($union['spouse'])) {
-                $this->build_families($union['spouse']);
-                $fam_id = $this->dict_add_fam($union);
+                $this->buildFamilies($union['spouse']);
+                $fam_id = $this->dictAddFam($union);
 
                 $unions[$idx]['fams'] = $fam_id;
-                $unions[$idx]['source'] = $this->sources_find_type('spouse', $p);
+                $unions[$idx]['source'] = $this->sourcesFindType('spouse', $person);
 
                 // retrive union for 'spouse' and set fam_id.
-                $this->set_fam_id($union['spouse'], $p, $fam_id);
+                $this->setFamId($union['spouse'], $person, $fam_id);
             }
             // childs
             if (isset($union['childs'])) {
@@ -130,28 +130,28 @@ class GedcomWriter
                         }
                         
                     }
-                    $this->build_families($c);
+                    $this->buildFamilies($c);
                 }
             }
         }
         // $unions is by reference so instruction below is not needed.
-        # $p->set('unions', $unions);
+        # $person->set('unions', $unions);
     }
 
-    public function display_individual($p)
+    public function displayIndividual($person)
     {
         
-        if (is_array($p)) {
+        if (is_array($person)) {
             return false;
         }
 
         $famc = '-';
-        if (isset($p->famc)) {
-            $famc = $p->famc;
+        if (isset($person->famc)) {
+            $famc = $person->famc;
         }
 
         $fams = array();
-        foreach ($p->unions as $u) {
+        foreach ($person->unions as $u) {
             if (isset($u['fams'])) {
                 $fams[] = $u['fams'];
             }
@@ -162,38 +162,38 @@ class GedcomWriter
             $fams = '-';
         }
 
-        # printf("# display_individual(%s / %s / [%s,(%s)])\n", $p->name(), $p->id, $famc, $fams);
-        foreach ($p->unions as $union) {
+        # printf("# displayIndividual(%s / %s / [%s,(%s)])\n", $person->name(), $person->id, $famc, $fams);
+        foreach ($person->unions as $union) {
             //spouse
             if (isset($union['spouse'])) {
-                $this->display_individual($union['spouse']);
+                $this->displayIndividual($union['spouse']);
             }
             
             // childs
             if (isset($union['childs'])) {
                 foreach ($union['childs'] as $c) {
-                    $this->display_individual($c);
+                    $this->displayIndividual($c);
                 }
             }
         }
     }
 
-    protected function dict_add_indiv($p)
+    protected function dictAddIndiv($person)
     {
-        if (is_array($p)) {
+        if (is_array($person)) {
             return false;
         }
 
-        if (!is_a($p, 'Geneanet\Person')) {
-            //print_r($p);
+        if (!is_a($person, 'Geneanet\Person')) {
+            //print_r($person);
             throw new Exception("program error");
         }
-        $id = $this->dict->add(INDIVIDUALS, $p, $p->url);
-        $p->id = $id;
-        # printf("# dict_add_indiv(%s) : %s\n", $p->name(), $id);
+        $id = $this->dict->add(INDIVIDUALS, $person, $person->url);
+        $person->id = $id;
+        # printf("# dictAddIndiv(%s) : %s\n", $person->name(), $id);
     }
 
-    protected function dict_add_fam(&$union)
+    protected function dictAddFam(&$union)
     {
         if (!isset($union['self'])) {
             return false;
@@ -204,58 +204,58 @@ class GedcomWriter
         }
 
         if ($union['self']->gender == 'M') {
-            $p1 = $union['self'];
-            $p2 = $union['spouse'];
+            $person1 = $union['self'];
+            $person2 = $union['spouse'];
         } else {
-            $p1 = $union['spouse'];
-            $p2 = $union['self'];
+            $person1 = $union['spouse'];
+            $person2 = $union['self'];
         }
 
-        if (is_array($p1)|| is_array($p2)) {
+        if (is_array($person1)|| is_array($person2)) {
             return false;
         }
 
-        if (!is_a($p1, 'Geneanet\Person') || !is_a($p2, 'Geneanet\Person')) {
-            //print_r($p1);
-            //print_r($p2);
+        if (!is_a($person1, 'Geneanet\Person') || !is_a($person2, 'Geneanet\Person')) {
+            //print_r($person1);
+            //print_r($person2);
             throw new Exception("program error");
         }
         
-        $key = sprintf("%s+%s", $p1->id, $p2->id);
+        $key = sprintf("%s+%s", $person1->id, $person2->id);
         $_union = array(
-            'HUSB' => $p1,
-            'WIFE' => $p2,
+            'HUSB' => $person1,
+            'WIFE' => $person2,
          );
         $id = $this->dict->add(FAMILIES, $_union, $key);
         # $union['id'] = $id;
-        # printf("# dict_add_fam(%s + %s) : id='%s' ; key='%s'\n", $p1->name(), $p2->name(), $id, $key);
+        # printf("# dictAddFam(%s + %s) : id='%s' ; key='%s'\n", $person1->name(), $person2->name(), $id, $key);
         return $id;
     }
 
-    protected function set_fam_id($p1, $p2, $fam_id)
+    protected function setFamId($person1, $person2, $fam_id)
     {
-        $unions = &$p1->get('unions');
+        $unions = &$person1->get('unions');
         foreach ($unions as $idx => $u) {
-            if ($u['name'] == $p2->name()) {
+            if ($u['name'] == $person2->name()) {
                 $unions[$idx]['fams'] = $fam_id;
             }
         }
     }
 
-    public function write($p)
+    public function write($person)
     {
         
-        $this->build($p) ;
+        $this->build($person) ;
 
         $txt = '';
         
         $txt .= $this->header();
-        $txt .= $this->individuals($p);
-        $txt .= $this->families($p);
-        # $txt .= $this->notes($p);
-        # $txt .= $this->sources($p);
+        $txt .= $this->individuals($person);
+        $txt .= $this->families($person);
+        # $txt .= $this->notes($person);
+        # $txt .= $this->sources($person);
 
-        $txt .= $this->tailer($p);
+        $txt .= $this->tailer($person);
         
         return $txt;
 
@@ -309,9 +309,9 @@ class GedcomWriter
     {
         return "0 TRLR\n";
     }
-    protected function individuals($p, $fam_id = null)
+    protected function individuals($person, $fam_id = null)
     {
-        $txt = $this->individual($p, $fam_id);
+        $txt = $this->individual($person, $fam_id);
         
         // unions
           // childs
@@ -319,11 +319,11 @@ class GedcomWriter
         // siblings
         
         // unions : spouse and childs
-        if (!isset($p->unions)) {
+        if (!isset($person->unions)) {
             return $txt;
         }
 
-        foreach ($p->unions as $union) {
+        foreach ($person->unions as $union) {
             # femme ou mari union
             if (isset($union['spouse'])) {
                 $txt .= $this->individual($union['spouse'], $fam_id);
@@ -358,18 +358,18 @@ class GedcomWriter
 
 	*/
 
-    protected function individual($p)
+    protected function individual($person)
     {
 
-        if (!is_a($p, 'Geneanet\Person')) {
+        if (!is_a($person, 'Geneanet\Person')) {
             return;
         }
 
-        $txt = sprintf("0 @%s@ INDI\n", $p->id);
-        $txt .= sprintf("1 NAME %s/%s/\n", $p->first, $p->last);
-        $txt .= sprintf("1 SEX %s\n", $p->gender);
+        $txt = sprintf("0 @%s@ INDI\n", $person->id);
+        $txt .= sprintf("1 NAME %s/%s/\n", $person->first, $person->last);
+        $txt .= sprintf("1 SEX %s\n", $person->gender);
         
-        $birth = $p->birth;
+        $birth = $person->birth;
 
         if ((trim($birth['place']) != '') || (trim($birth['date']) != '')) {
             $txt .= "1 BIRT\n";
@@ -379,13 +379,13 @@ class GedcomWriter
             if (trim($birth['date']) != '') {
                 $txt .= sprintf("2 DATE %s\n", $birth['date']);
             }
-            if (($src = $this->sources_find_type('birth', $p)) !== false) {
+            if (($src = $this->sourcesFindType('birth', $person)) !== false) {
                 $txt .= sprintf("2 SOUR %s\n", $src);
             }
         }
 
-        $death = $p->death;
-        # printf("# %s\n", $p->name());print_r($birth);print_r($death);
+        $death = $person->death;
+        # printf("# %s\n", $person->name());print_r($birth);print_r($death);
         if ((trim($death['place']) != '') || (trim($death['date']) != '')) {
             $txt .= "1 DEAT\n";
             if (trim($death['place']) != '') {
@@ -394,47 +394,47 @@ class GedcomWriter
             if (trim($death['date']) != '') {
                 $txt .= sprintf("2 DATE %s\n", $death['date']);
             }
-            if (($src = $this->sources_find_type('death', $p)) !== false) {
+            if (($src = $this->sourcesFindType('death', $person)) !== false) {
                 $txt .= sprintf("2 SOUR %s\n", $src);
             }
                 
         }
 
         // is the child of family
-        if (isset($p->famc)) {
-            $txt .= sprintf("1 FAMC @%s@\n", $p->famc);
+        if (isset($person->famc)) {
+            $txt .= sprintf("1 FAMC @%s@\n", $person->famc);
         }
 
-        foreach ($p->unions as $u) {
+        foreach ($person->unions as $u) {
             if (isset($u['fams'])) {
                 $txt .= sprintf("1 FAMS @%s@\n", $u['fams']);
-                # if(($src = $this->sources_find_type('spouse', $p)) !== false)
+                # if(($src = $this->sourcesFindType('spouse', $person)) !== false)
                 #	$txt .= sprintf("2 SOUR %s\n", $src);
             }
         }
         
         // remove lang=en and templ=mobile from url
         $url = new URL();
-        $_url = $url->split(rawurldecode($p->url));
+        $_url = $url->split(rawurldecode($person->url));
         unset($_url->lang);
         unset($_url->templ);
 
         $txt .= sprintf("1 NOTE Source Geneanet : %s\n", $_url->build());
-        # $txt .= sprintf("1 SOUR %s\n", $p->url);  # attributes starting with _ are ignored.
+        # $txt .= sprintf("1 SOUR %s\n", $person->url);  # attributes starting with _ are ignored.
         
-        if (isset($p->notes)) {
-            foreach ($p->notes as $n) {
+        if (isset($person->notes)) {
+            foreach ($person->notes as $n) {
                 $txt .= sprintf("1 NOTE %s\n", $n);
             }
         }
-        if (isset($p->sources)) {
-            foreach ($p->sources as $n) {
+        if (isset($person->sources)) {
+            foreach ($person->sources as $n) {
                 $txt .= sprintf("1 NOTE SRC: %s\n", $n);
             }
         }
 
-        if (isset($p->sources)) {
-            $txt .= sprintf("1 SOUR %s\n", join("; ", $p->sources));
+        if (isset($person->sources)) {
+            $txt .= sprintf("1 SOUR %s\n", join("; ", $person->sources));
         }
         return $txt;
     }
@@ -459,12 +459,12 @@ class GedcomWriter
 	 */
 
     /* extract sub source : birth, death, spouse, ...*/
-    protected function sources_find_type($type, $p)
+    protected function sourcesFindType($type, $person)
     {
-        if (!isset($p->sources)) {
+        if (!isset($person->sources)) {
             return false;
         }
-        foreach ($p->sources as $s) {
+        foreach ($person->sources as $s) {
             if (preg_match("#$type\s*:(.*)#", $s, $values)) {
                 return $values[1];
             }
@@ -472,7 +472,7 @@ class GedcomWriter
         return false;
     }
 
-    protected function families($p)
+    protected function families($person)
     {
         
         $txt = '';
@@ -509,12 +509,12 @@ class GedcomWriter
         return $txt;
     }
 
-    protected function notes($p)
+    protected function notes($person)
     {
         return '';
     }
 
-    protected function sources($p)
+    protected function sources($person)
     {
         return '';
     }

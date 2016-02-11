@@ -21,14 +21,14 @@ $config = new Config();
 $geneanet = new GeneanetServer();
 
 if (!$geneanet->login($config->get('connexion/user'), $config->get('connexion/passwd'))) {
-    printf($geneanet->last_error() . "\n");
+    printf($geneanet->lastError() . "\n");
     exit(0);
 }
 
 $grabber = new Grabber($geneanet);
-$grabber->set_delay($config->get('grabber/delay'));
+$grabber->setDelay($config->get('grabber/delay'));
 if ($config->get('connexion/proxy') != '') {
-    $grabber->set_proxy($config->get('connexion/proxy'));
+    $grabber->setProxy($config->get('connexion/proxy'));
 }
 
 
@@ -45,13 +45,13 @@ if (isset($_REQUEST['url'])) {
 
 printf("url = '%s'<br>\n", $url);
 
-$html = $cache->get_from_cache($url, 3600);
+$html = $cache->getFromCache($url, 3600);
 if ($html === false) {
     $html = $geneanet->get($url);
     if (preg_match('#Bad Request#i', $html)) {
         $html == false;
     } else {
-        $cache->insert_into_cache($url, $html);
+        $cache->insertIntoCache($url, $html);
     }
 }
 
@@ -66,7 +66,7 @@ if ($html !== false) {
 
 <?php
 if ($html !== false) {
-    echo $person->to_html();
+    echo $person->toHtml();
 }
 ?>
     <pre>

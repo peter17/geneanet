@@ -28,7 +28,7 @@ class DbCache
         $this->db = new DbSqlite($db_file);
     }
 
-    public function get_from_cache($key, $age)
+    public function getFromCache($key, $age)
     {
         $time = time() - $age;
 
@@ -39,12 +39,12 @@ class DbCache
         }
 
         $sql = sprintf("SELECT count(key) FROM %s WHERE key='%s' %s", $this->table_name, $key, $where);
-        if ($this->db->get_one($sql) == 0) {
+        if ($this->db->getOne($sql) == 0) {
             return false;
         }
 
         $sql = sprintf("SELECT content FROM %s WHERE key='%s' %s", $this->table_name, $key, $where);
-        $content = $this->db->get_one($sql);
+        $content = $this->db->getOne($sql);
         return unserialize($content);
     }
 
@@ -53,8 +53,8 @@ class DbCache
         $sql = sprintf(
             "DELETE FROM '%s' WHERE key='%s' AND category='%s';",
             $this->table_name,
-            $this->db->escape_string($key),
-            $this->db->escape_string($category)
+            $this->db->escape($key),
+            $this->db->escape($category)
         );
 
         $this->db->exec($sql);
@@ -67,30 +67,30 @@ class DbCache
             "DELETE FROM '%s' WHERE time<='%s' AND category='%s';",
             $this->table_name,
             $time,
-            $this->db->escape_string($category)
+            $this->db->escape($category)
         );
 
         $this->db->exec($sql);
     }
 
-    public function purge_by_calid($calid)
+    public function purgeByCalid($calid)
     {
         $sql = sprintf(
             "DELETE FROM '%s' WHERE extra='%s';",
             $this->table_name,
-            $this->db->escape_string($calid)
+            $this->db->escape($calid)
         );
 
         $this->db->exec($sql);
     }
 
-    public function update_cache($key, $content, $category = 'default', $extra = '')
+    public function updateCache($key, $content, $category = 'default', $extra = '')
     {
         $this->delete($key, $category);
-        $this->insert_into_cache($key, $content, $category, $extra);
+        $this->insertIntoCache($key, $content, $category, $extra);
     }
 
-    public function insert_into_cache($key, $content, $category = 'default', $extra = '')
+    public function insertIntoCache($key, $content, $category = 'default', $extra = '')
     {
 
         $content = serialize($content);
@@ -98,12 +98,12 @@ class DbCache
         $sql = sprintf(
             "INSERT INTO '%s' ('key', 'size', 'time', 'category', 'extra', 'content') VALUES ( '%s', %d, %d, '%s', '%s', '%s');",
             $this->table_name,
-            $this->db->escape_string($key),
+            $this->db->escape($key),
             strlen($content),
             time(),
-            $this->db->escape_string($category),
-            $this->db->escape_string($extra),
-            $this->db->escape_string($content)
+            $this->db->escape($category),
+            $this->db->escape($extra),
+            $this->db->escape($content)
         );
 
         $this->db->exec($sql);
@@ -117,7 +117,7 @@ class DbCache
             $this->table_name
         );
 
-        return $this->db->get_one($sql);
+        return $this->db->getOne($sql);
     }
 
 
@@ -126,13 +126,13 @@ class DbCache
         $sql = sprintf(
             "SELECT time FROM %s WHERE key='%s'",
             $this->table_name,
-            $this->db->escape_string($key)
+            $this->db->escape($key)
         );
 
-        return time() - $this->db->get_one($sql);
+        return time() - $this->db->getOne($sql);
     }
 
-    public function age_mn($key)
+    public function ageMn($key)
     {
         return intval($this->age($key) / 60);
     }
@@ -144,18 +144,18 @@ class DbCache
             $this->table_name
         );
 
-        return $this->db->get_array($sql);
+        return $this->db->getArray($sql);
     }
 }
 /*
 
     $cache = new DbCache('var/cache.sqlite');
     
-    # $cache->insert_into_cache('azerty', 'some content');
-    $cache->update_cache('azerty', 'some content ...');
+    # $cache->insertIntoCache('azerty', 'some content');
+    $cache->updateCache('azerty', 'some content ...');
     $cache->cleanup($age=60*10);
     
-    # $content = $cache->get_from_cache('azerty', 2*60);
+    # $content = $cache->getFromCache('azerty', 2*60);
     # print_r($content);
     
     printf("count : %s\n", $cache->count());

@@ -14,40 +14,40 @@ class CURL
         
         # this is default with CURL : reads http_proxy
         if (getenv('http_proxy')) {
-            $this->set_proxy(getenv('http_proxy'));
+            $this->setProxy(getenv('http_proxy'));
         }
     }
     
     public function doRequest($method, $url, $vars)
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_USERAGENT, $this->user_agent);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        $curlHandler = curl_init();
+        curl_setopt($curlHandler, CURLOPT_URL, $url);
+        curl_setopt($curlHandler, CURLOPT_HEADER, 0);
+        curl_setopt($curlHandler, CURLOPT_USERAGENT, $this->user_agent);
+        curl_setopt($curlHandler, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curlHandler, CURLOPT_FOLLOWLOCATION, true);
 
         if ($this->proxy != null) {
-            curl_setopt($ch, CURLOPT_PROXY, $this->proxy);
+            curl_setopt($curlHandler, CURLOPT_PROXY, $this->proxy);
         }
 
-        # curl_setopt($ch, CURLOPT_VERBOSE, true); verbose mode
-        if (!$this->is_safe_mode()) {
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-            curl_setopt($ch, CURLOPT_COOKIEJAR, 'var/cookie.txt');
-            curl_setopt($ch, CURLOPT_COOKIEFILE, 'var/cookie.txt');
+        # curl_setopt($curlHandler, CURLOPT_VERBOSE, true); verbose mode
+        if (!$this->isSafeMode()) {
+            curl_setopt($curlHandler, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($curlHandler, CURLOPT_COOKIEJAR, 'var/cookie.txt');
+            curl_setopt($curlHandler, CURLOPT_COOKIEFILE, 'var/cookie.txt');
         }
     
         if ($method == 'POST') {
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $vars);
+            curl_setopt($curlHandler, CURLOPT_POST, 1);
+            curl_setopt($curlHandler, CURLOPT_POSTFIELDS, $vars);
         }
-        $data = curl_exec($ch);
-        curl_close($ch);
+        $data = curl_exec($curlHandler);
+        curl_close($curlHandler);
         if ($data) {
             return $data;
         } else {
-            return curl_error($ch);
+            return curl_error($curlHandler);
         }
     }
 
@@ -61,7 +61,7 @@ class CURL
         return $this->doRequest('POST', $url, $vars);
     }
     
-    protected function is_safe_mode()
+    protected function isSafeMode()
     {
         if (ini_get('safe_mode')===true) {
             return true;
@@ -72,7 +72,7 @@ class CURL
         return false;
     }
     
-    public function set_proxy($proxy)
+    public function setProxy($proxy)
     {
         $this->proxy = $proxy;
     }
