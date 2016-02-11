@@ -11,20 +11,20 @@ namespace Geneanet;
 
 /* geany_encoding=ISO-8859-15 */
 
-define("SECTION_INFO", "info");
-define("SECTION_HALF_SIBLINGS", "half-siblings");
-define("SECTION_SIBLINGS", "siblings");
-define("SECTION_PARENTS", "parents");
-define("SECTION_UNIONS", "unions");
-define("SECTION_NOTES", "notes");
-define("SECTION_SOURCES", "sources");
-define("SECTION_RELATIONSHIPS", "relationships");
-define("SECTION_FAMILY_NOTES", "family-notes");
-define("SECTION_FAMILY_TREE_PREVIEW", "family-tree-preview");
-
 
 class GeneanetEntryParser
 {
+    const SECTION_INFO                = "info";
+    const SECTION_HALF_SIBLINGS       = "half-siblings";
+    const SECTION_SIBLINGS            = "siblings";
+    const SECTION_PARENTS             = "parents";
+    const SECTION_UNIONS              = "unions";
+    const SECTION_NOTES               = "notes";
+    const SECTION_SOURCES             = "sources";
+    const SECTION_RELATIONSHIPS       = "relationships";
+    const SECTION_FAMILY_NOTES        = "family-notes";
+    const SECTION_FAMILY_TREE_PREVIEW = "family-tree-preview";
+
 
     public function __construct()
     {
@@ -54,7 +54,7 @@ class GeneanetEntryParser
          */
         $div = $html->find('div#tree_content h1,h2,ul,p,table');
 
-        $section = SECTION_INFO;
+        $section = static::SECTION_INFO;
         foreach ($div as $e) {
             # printf("\n# section : %s / [%s] %s\n", $section, $e->tag, $this->encode($this->strLimit($e->plaintext)));
 
@@ -64,35 +64,35 @@ class GeneanetEntryParser
                 # Half-siblings
                 if (preg_match('/Half-siblings/i', $e->plaintext)) {
                     # printf("# match half-sibling\n");
-                    $section = SECTION_HALF_SIBLINGS;
+                    $section = static::SECTION_HALF_SIBLINGS;
                 } # Siblings
                 elseif (preg_match('/Siblings/i', $e->plaintext)) {
                     # printf("# match sibling\n");
-                    $section = SECTION_SIBLINGS;
+                    $section = static::SECTION_SIBLINGS;
                 } # Parents
                 elseif (preg_match('/Parents/i', $e->plaintext)) {
                     # printf("# match Parents\n");
-                    $section = SECTION_PARENTS;
+                    $section = static::SECTION_PARENTS;
                 } # Spouses and children,
                 elseif (preg_match('/Spouses( and children|)/i', $e->plaintext)) {
                     # printf("# match unions\n");
-                    $section = SECTION_UNIONS;
+                    $section = static::SECTION_UNIONS;
                 } # notes
                 elseif (preg_match('/Notes/i', $e->plaintext)) {
                     # printf("# match notes\n");
-                    $section = SECTION_NOTES;
+                    $section = static::SECTION_NOTES;
                 } elseif (preg_match('/Family Note/i', $e->plaintext)) {
                     # printf("# match Family notes\n");
-                    $section = SECTION_FAMILY_NOTES;
+                    $section = static::SECTION_FAMILY_NOTES;
                 } elseif (preg_match('/Sources/i', $e->plaintext)) {
                     # printf("# match sources\n");
-                    $section = SECTION_SOURCES;
+                    $section = static::SECTION_SOURCES;
                 } elseif (preg_match('/Family Tree Preview/i', $e->plaintext)) {
                     # printf("# match Family notes\n");
-                    $section = SECTION_FAMILY_TREE_PREVIEW;
+                    $section = static::SECTION_FAMILY_TREE_PREVIEW;
                 } # else if(preg_match('/Relationships/i', $e->plaintext)){
                 #    # printf("# match sources\n");
-                #    $section = SECTION_RELATIONSHIPS;
+                #    $section = static::SECTION_RELATIONSHIPS;
                 #}
                 
                 # default section
@@ -116,29 +116,29 @@ class GeneanetEntryParser
                 
             } else {
                 switch($section){
-                    case SECTION_INFO:
+                    case static::SECTION_INFO:
                         $person = $this->parseInfo($person, $e);
                         break;
-                    case SECTION_SIBLINGS:
+                    case static::SECTION_SIBLINGS:
                         if ($e->tag == 'p') {
                             break;
                         }
 
                         $person = $this->parseSiblings($person, $e);
                         break;
-                    case SECTION_HALF_SIBLINGS:
+                    case static::SECTION_HALF_SIBLINGS:
                         if ($e->tag == 'p') {
                             break;
                         }
                         $person = $this->parseHalfSiblings($person, $e);
                         break;
-                    case SECTION_PARENTS:
+                    case static::SECTION_PARENTS:
                         if ($e->tag == 'p') {
                             break;
                         }
                         $person = $this->parseParents($person, $e);
                         break;
-                    case SECTION_UNIONS:
+                    case static::SECTION_UNIONS:
                         if ($e->tag == 'p') {
                             break;
                         }
@@ -150,16 +150,16 @@ class GeneanetEntryParser
                             $person = $this->parseUnions($person, $e);
                         }
                         break;
-                    case SECTION_NOTES:
+                    case static::SECTION_NOTES:
                         $person = $this->parseNotes($person, $e);
                         break;
-                    case SECTION_FAMILY_NOTES:
+                    case static::SECTION_FAMILY_NOTES:
                         $person = $this->parseFamilyNotes($person, $e);
                         break;
-                    case SECTION_FAMILY_TREE_PREVIEW:
+                    case static::SECTION_FAMILY_TREE_PREVIEW:
                         $person = $this->parseFamilyTreePreview($person, $e);
                         break;
-                    case SECTION_SOURCES:
+                    case static::SECTION_SOURCES:
                         $person = $this->parseSources($person, $e);
                         break;
                     default:

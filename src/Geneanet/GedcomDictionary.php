@@ -4,13 +4,6 @@ namespace Geneanet;
 
 /* geany_encoding=ISO-8859-15 */
 
-define('INDIVIDUALS', 'individuals');
-define('FAMILIES', 'families');
-define('NOTES', 'notes');
-define('SOURCES', 'sources');
-// define('REPOS',       'repos');
-// define('OBJECT',      'object');
-
 
 /*
  * this dictionnary help creating uniq UID for persons (INDividuals), FAMilies, NOTes, and sources (SRC).
@@ -18,27 +11,32 @@ define('SOURCES', 'sources');
 
 class GedcomDictionary
 {
+    const INDIVIDUALS = 'individuals';
+    const FAMILIES    = 'families';
+    const NOTES       = 'notes';
+    const SOURCES     = 'sources';
+    const REPOS       = 'repos';
 
     protected $dict = array(
-        INDIVIDUALS  => array(),
-        FAMILIES     => array(),
-        NOTES        => array(),
-        SOURCES      => array()
+        self::INDIVIDUALS  => array(),
+        self::FAMILIES     => array(),
+        self::NOTES        => array(),
+        self::SOURCES      => array()
     );
 
     protected $keys = array(
-        INDIVIDUALS  => array(),
-        FAMILIES     => array(),
-        NOTES        => array(),
-        SOURCES      => array()
+        self::INDIVIDUALS  => array(),
+        self::FAMILIES     => array(),
+        self::NOTES        => array(),
+        self::SOURCES      => array()
     );
     
     // prefix for "id" - see $this->make_prefix()
     protected $prefix = array(
-        INDIVIDUALS  => 'IND',
-        FAMILIES     => 'FAM',
-        NOTES        => 'NOT',
-        SOURCES      => 'SRC'
+        self::INDIVIDUALS  => 'IND',
+        self::FAMILIES     => 'FAM',
+        self::NOTES        => 'NOT',
+        self::SOURCES      => 'SRC'
     );
 
     public function __construct()
@@ -90,10 +88,10 @@ class GedcomDictionary
     protected function checkType($type)
     {
         switch($type){
-            case INDIVIDUALS:
-            case FAMILIES:
-            case NOTES:
-            case SOURCES:
+            case static::INDIVIDUALS:
+            case static::FAMILIES:
+            case static::NOTES:
+            case static::SOURCES:
                 break;
             default:
                 throw new Exception("unknow type $type");

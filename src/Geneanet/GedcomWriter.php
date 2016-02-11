@@ -188,7 +188,7 @@ class GedcomWriter
             //print_r($person);
             throw new Exception("program error");
         }
-        $id = $this->dict->add(INDIVIDUALS, $person, $person->url);
+        $id = $this->dict->add(GedcomDictionary::INDIVIDUALS, $person, $person->url);
         $person->id = $id;
         # printf("# dictAddIndiv(%s) : %s\n", $person->name(), $id);
     }
@@ -226,7 +226,7 @@ class GedcomWriter
             'HUSB' => $person1,
             'WIFE' => $person2,
          );
-        $id = $this->dict->add(FAMILIES, $_union, $key);
+        $id = $this->dict->add(GedcomDictionary::FAMILIES, $_union, $key);
         # $union['id'] = $id;
         # printf("# dictAddFam(%s + %s) : id='%s' ; key='%s'\n", $person1->name(), $person2->name(), $id, $key);
         return $id;
@@ -477,7 +477,7 @@ class GedcomWriter
         
         $txt = '';
     
-        foreach ($this->dict->getall(FAMILIES) as $fam_id => $fam) {
+        foreach ($this->dict->getall(GedcomDictionary::FAMILIES) as $fam_id => $fam) {
             $txt .= sprintf("0 @%s@ FAM\n", $fam_id);
             $txt .= sprintf("1 HUSB @%s@\n", $fam['HUSB']->id);
             $txt .= sprintf("1 WIFE @%s@\n", $fam['WIFE']->id);
