@@ -1,6 +1,6 @@
 <?php
 
-require_once("lib/Person.php");
+namespace Geneanet;
 
 /* geany_encoding=ISO-8859-15 */
 

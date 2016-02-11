@@ -1,5 +1,7 @@
 <?php
 
+namespace Geneanet;
+
 /*
  * 
  *  parse entry from Geneanet genealogy server
@@ -8,9 +10,6 @@
  */
 
 /* geany_encoding=ISO-8859-15 */
-
-require_once(__DIR__."/../vendor/autoload.php");
-require_once('lib/Person.php');
 
 define("SECTION_INFO", "info");
 define("SECTION_HALF_SIBLINGS", "half-siblings");
@@ -36,7 +35,7 @@ class GeneanetEntryParser
     {
 
         $person = new Person();
-        $html = new simple_html_dom($data_html);
+        $html = new \simple_html_dom($data_html);
 
         # incorect request
         if ($h1 = $html->find('h1', 1)) {

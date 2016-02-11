@@ -1,14 +1,12 @@
 <?php
 
+namespace Geneanet;
+
+require_once(__DIR__."/autoload.php");
+
 error_reporting(E_ALL);
 
 /* geany_encoding=ISO-8859-15 */
-
-require_once('lib/Config.php');
-require_once('lib/Person.php');
-require_once('lib/Geneanet.php');
-require_once('lib/Grabber.php');
-require_once('lib/GedcomWriter.php');
 
 $config = new Config();
 $geneanet = new GeneanetServer();
@@ -36,7 +34,6 @@ switch($test) {
 
     case 'single':
         $p = $grabber->grab_single($url);
-        print_r($p);
         echo utf8_decode($p);
         break;
 

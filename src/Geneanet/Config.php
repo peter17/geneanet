@@ -1,8 +1,10 @@
 <?php
+
+namespace Geneanet;
+
 /**
  * simple configuration class management.
  *
- *      require_once('lib/Config.php');
  *      // auto-load config file from :
  *      //  - $HOME/.config/geneanet.ini,
  *      //  - current directory : geneanet.ini, config.ini, config.ini.default

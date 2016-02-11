@@ -2,16 +2,22 @@
 
 /* Geneanet Page live browser, decoder */
 
+namespace Geneanet;
+
+require_once(__DIR__."/autoload.php");
+
 error_reporting(E_ALL);
 
-ini_set('include_path', '.:lib' . ini_get('include_path'));
 
+/*
+ini_set('include_path', '.:lib' . ini_get('include_path'));
 require_once('lib/Config.php');
 require_once('lib/Person.php');
 require_once('lib/Geneanet.php');
 require_once('lib/DbCache.php');
+ */
 
-
+$config = new Config();
 $geneanet = new GeneanetServer();
 
 if (!$geneanet->login($config->get('connexion/user'), $config->get('connexion/passwd'))) {

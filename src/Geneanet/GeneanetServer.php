@@ -1,9 +1,8 @@
 <?php
 
+namespace Geneanet;
 
 /* geany_encoding=ISO-8859-15 */
-
-require_once('lib/CURL.php');
 
 
 
@@ -21,7 +20,7 @@ class GeneanetServer
 
     public function __construct()
     {
-        $this->curl = new Curl();
+        $this->curl = new CURL();
     }
     
     public function login($user, $passwd)

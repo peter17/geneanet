@@ -1,9 +1,10 @@
 <?php
 
+namespace Geneanet;
+
+require_once(__DIR__."/autoload.php");
+
 error_reporting(E_ALL);
-
-require_once('lib/GedcomWriter.php');
-
 
 if (isset($argv[1])) {
     $file = $argv[1];

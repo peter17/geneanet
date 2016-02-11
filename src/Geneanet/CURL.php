@@ -1,5 +1,7 @@
 <?php
 
+namespace Geneanet;
+
 /* geany_encoding=ISO-8859-15 */
 
 class CURL

@@ -1,5 +1,7 @@
 <?php
 
+namespace Geneanet;
+
 /**
  *
  *
@@ -167,6 +169,7 @@ if (!class_exists('SQLite3')) {
             }
             $this->filename = $filename;
             $this->db = new SQLite3($filename);
+            print_r($this->db);
             if ($this->db == false) {
                 $this->error('Sqlite::open()');
             }

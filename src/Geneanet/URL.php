@@ -1,12 +1,13 @@
 <?php
 
+namespace Geneanet;
+
 /*
 
   URL class wrapper : manipulate URL parts.
 
   simple test case usage :
 
-	require_once('lib/URL.php');
 
 	$url = new URL();
 	$_url = 'http://www.google.fr/search?content=genealogy';
@@ -49,7 +50,7 @@ class URL
                 $_url['args']['values'][$vv[0]] = $vv[1];
             }
 
-            return new UrlArgs($_url);
+            return new URLArgs($_url);
         }
 
         throw new Exception("wrong url format '$url'\n");
@@ -98,7 +99,7 @@ class URL
 	)
 
 */
-class UrlArgs
+class URLArgs
 {
     protected $args;
 

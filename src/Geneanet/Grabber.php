@@ -1,9 +1,6 @@
 <?php
 
-require_once('lib/URL.php');
-require_once('lib/Person.php');
-require_once('lib/Geneanet.php');
-require_once('lib/GeneanetEntryParser.php');
+namespace Geneanet;
 
 /* geany_encoding=ISO-8859-15 */
 
@@ -23,7 +20,7 @@ class Grabber
     {
         $this->geneanet = $geneanet;
         $this->parser = new GeneanetEntryParser();
-        $this->url = new Url();
+        $this->url = new URL();
     }
 
     public function grab_single($url)

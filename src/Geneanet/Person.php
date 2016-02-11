@@ -1,5 +1,7 @@
 <?php
 
+namespace Geneanet;
+
 /*
  * handle data for a Person
  * 

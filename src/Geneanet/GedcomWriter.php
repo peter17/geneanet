@@ -1,5 +1,7 @@
 <?php
 
+namespace Geneanet;
+
 /*
  * usefull information for GEDCOM writing from :
  *  - Pierre FAUQUE :
@@ -26,12 +28,6 @@
  */
 
 /* geany_encoding=ISO-8859-15 */
-
-require_once("lib/URL.php");
-require_once("lib/Config.php");
-require_once("lib/Person.php");
-require_once("lib/GedcomDictionary.php");
-
 
 class GedcomWriter
 {
@@ -104,7 +100,7 @@ class GedcomWriter
         $unions = &$p->get('unions');
         foreach ($unions as $idx => $union) {
             # printf("# build_families(%s)\n", $p->name());
-            print_r($unions);
+            //print_r($unions);
             //spouse
             $fam_id = null;
             if (isset($union['spouse'])) {
@@ -188,8 +184,8 @@ class GedcomWriter
             return false;
         }
 
-        if (!is_a($p, 'Person')) {
-            print_r($p);
+        if (!is_a($p, 'Geneanet\Person')) {
+            //print_r($p);
             throw new Exception("program error");
         }
         $id = $this->dict->add(INDIVIDUALS, $p, $p->url);
@@ -219,9 +215,9 @@ class GedcomWriter
             return false;
         }
 
-        if (!is_a($p1, 'Person') || !is_a($p2, 'Person')) {
-            print_r($p1);
-            print_r($p2);
+        if (!is_a($p1, 'Geneanet\Person') || !is_a($p2, 'Geneanet\Person')) {
+            //print_r($p1);
+            //print_r($p2);
             throw new Exception("program error");
         }
         
@@ -365,7 +361,7 @@ class GedcomWriter
     protected function individual($p)
     {
 
-        if (!is_a($p, 'Person')) {
+        if (!is_a($p, 'Geneanet\Person')) {
             return;
         }
 
@@ -418,7 +414,7 @@ class GedcomWriter
         }
         
         // remove lang=en and templ=mobile from url
-        $url = new Url();
+        $url = new URL();
         $_url = $url->split(rawurldecode($p->url));
         unset($_url->lang);
         unset($_url->templ);
@@ -492,7 +488,7 @@ class GedcomWriter
                     continue;
                 }
                 foreach ($u['childs'] as $c) {
-                    if (!is_a($c, 'Person')) {
+                    if (!is_a($c, 'Geneanet\Person')) {
                         break;
                     }
                     $txt .= sprintf("1 CHIL @%s@\n", $c->id);

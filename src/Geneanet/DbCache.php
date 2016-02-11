@@ -1,6 +1,6 @@
 <?php
 
-require_once('DbSqlite.php');
+namespace Geneanet;
 
 /**
  *  PRAGMA auto_vacuum = FULL;
