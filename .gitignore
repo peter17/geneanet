@@ -1,2 +1,5 @@
 extra/*
 vendor/
+*.swp
+var/cookie.txt
+var/cache

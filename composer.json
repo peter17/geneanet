@@ -8,6 +8,7 @@
         }
     ],
     "require": {
+        "EmanueleMinotto/simple-html-dom": "*"
     },
     "autoload": {
         "psr-0": { "" : "lib/" }

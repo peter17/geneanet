@@ -9,7 +9,7 @@
 
 /* geany_encoding=ISO-8859-15 */
 
-require_once('lib/simplehtmldom.php');
+require_once(__DIR__."/../vendor/autoload.php");
 require_once('lib/Person.php');
 
 define("SECTION_INFO", "info");
