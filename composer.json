@@ -11,6 +11,6 @@
         "EmanueleMinotto/simple-html-dom": "*"
     },
     "autoload": {
-        "psr-0": { "" : "lib/" }
+        "psr-4": { "Geneanet\\" : "src/Geneanet/" }
     }
 }
