@@ -404,7 +404,7 @@ class GedcomWriter
                 
         }
 
-        // is the child of familly
+        // is the child of family
         if (isset($p->famc)) {
             $txt .= sprintf("1 FAMC @%s@\n", $p->famc);
         }

@@ -7,6 +7,7 @@ require_once('lib/Person.php');
 require_once('lib/Geneanet.php');
 require_once('lib/Grabber.php');
 
+$config = new Config();
 $geneanet = new GeneanetServer();
 
 if (!$geneanet->login($config->get('connexion/user'), $config->get('connexion/passwd'))) {
