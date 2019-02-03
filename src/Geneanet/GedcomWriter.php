@@ -5,26 +5,26 @@ namespace Geneanet;
 /*
  * usefull information for GEDCOM writing from :
  *  - Pierre FAUQUE :
- *     - http://www.fr-webdev.net/, 
+ *     - http://www.fr-webdev.net/,
  * 	   - http://www.phpclasses.org/package/7009-PHP-Manage-genealogy-trees-for-a-family.html
  *  - http://ohmi.celeonet.fr/format_gedcom/indexGED.html
  *  - http://fr.geneawiki.com/index.php/Norme_Gedcom
- * 
- * 
+ *
+ *
  *  usage :
- * 
+ *
  * 		$config = new Config();
  * 		$geneanet = new GeneanetServer();
  * 		$grabber = new Grabber($geneanet);
- * 
+ *
  * 		...
- * 
- *    	$person = $grabber->grabSingle($url);
+ *
+ *		$person = $grabber->grabSingle($url);
  *		$grabber->grabAscendants($person, $level=3);
- * 
+ *
  *		$writer = new GedcomWriter($config);
  *		echo $writer->write($person);  # will output GEDCOM data.
- * 
+ *
  */
 
 /* geany_encoding=ISO-8859-15 */
@@ -46,11 +46,11 @@ class GedcomWriter
         }
 
     }
-    
+
     // build dictionnary
     public function build($person)
     {
-        
+
         if (is_array($person)) {
             return false;
         }
@@ -59,7 +59,7 @@ class GedcomWriter
         // step 2 : FAMILIES
         // step 3 : NOTES
         // step 4 : SOURCES
-        
+
         $this->buildIndividual($person);
         $this->buildFamilies($person);
         // $this->displayIndividual($person);
@@ -68,7 +68,7 @@ class GedcomWriter
     // build individual dictionnary
     public function buildIndividual($person)
     {
-        
+
         if (is_array($person)) {
             return false;
         }
@@ -80,7 +80,7 @@ class GedcomWriter
             if (isset($union['spouse'])) {
                 $this->buildIndividual($union['spouse']);
             }
-            
+
             // childs
             if (isset($union['childs'])) {
                 foreach ($union['childs'] as $c) {
@@ -93,7 +93,7 @@ class GedcomWriter
     // build families dictionnary
     public function buildFamilies($person)
     {
-        
+
         if (is_array($person)) {
             return false;
         }
@@ -122,13 +122,13 @@ class GedcomWriter
                         if ($fam_id != null) {
                             $unions[$idx]['childs'][$idx2]['famc'] = $fam_id;
                         }
-                        
+
                     } else {
                         # printf("# setting fams for %s\n", $c->name());
                         if ($fam_id != null) {
                             $unions[$idx]['childs'][$idx2]->famc = $fam_id;
                         }
-                        
+
                     }
                     $this->buildFamilies($c);
                 }
@@ -140,7 +140,7 @@ class GedcomWriter
 
     public function displayIndividual($person)
     {
-        
+
         if (is_array($person)) {
             return false;
         }
@@ -168,7 +168,7 @@ class GedcomWriter
             if (isset($union['spouse'])) {
                 $this->displayIndividual($union['spouse']);
             }
-            
+
             // childs
             if (isset($union['childs'])) {
                 foreach ($union['childs'] as $c) {
@@ -220,7 +220,7 @@ class GedcomWriter
             //print_r($person2);
             throw new Exception("program error");
         }
-        
+
         $key = sprintf("%s+%s", $person1->id, $person2->id);
         $_union = array(
             'HUSB' => $person1,
@@ -244,11 +244,11 @@ class GedcomWriter
 
     public function write($person)
     {
-        
+
         $this->build($person) ;
 
         $txt = '';
-        
+
         $txt .= $this->header();
         $txt .= $this->individuals($person);
         $txt .= $this->families($person);
@@ -256,32 +256,32 @@ class GedcomWriter
         # $txt .= $this->sources($person);
 
         $txt .= $this->tailer($person);
-        
+
         return $txt;
 
     }
-    
+
     protected function header($filename = null)
     {
 
         $txt = "0 HEAD\n"
-    
+
         // script (program) information : Name, Version, Company,
         . sprintf("1 SOUR %s\n", $this->cnf->get('gedcomwriter/name'))
         . sprintf("2 VERS %s\n", $this->cnf->get('gedcomwriter/version'))
         . sprintf("2 NAME %s\n", $this->cnf->get('gedcomwriter/author'))
         . sprintf("2 CORP %s\n", $this->cnf->get('gedcomwriter/corp'))
-        
+
         // misc : date, time
         . sprintf("1 DATE %s\n", strtoupper(date("j M Y")))
         . sprintf("2 TIME %s\n", date("H:i:s"))
         ;
-        
+
         if ($filename != null) {
             $txt .= sprintf("1 FILE %s\n", $filename);
         }
-        
-        
+
+
         // the submitter
         $txt .= sprintf("1 SUBM @U1@\n")                // pointer to the submitter
         . sprintf("1 COPR %s\n", $this->cnf->get('submitter/name'))
@@ -312,12 +312,12 @@ class GedcomWriter
     protected function individuals($person, $fam_id = null)
     {
         $txt = $this->individual($person, $fam_id);
-        
+
         // unions
           // childs
         // parents
         // siblings
-        
+
         // unions : spouse and childs
         if (!isset($person->unions)) {
             return $txt;
@@ -328,30 +328,30 @@ class GedcomWriter
             if (isset($union['spouse'])) {
                 $txt .= $this->individual($union['spouse'], $fam_id);
             }
-            
+
             if (isset($union['childs'])) {
                 foreach ($union['childs'] as $c) {
                     $txt .= $this->individuals($c, $fam_id);
                 }
             }
         }
-        
+
         return $txt;
     }
-    
+
     /*
 	    attributs actuellement gérés :
-	    
-		0 @[id]@ INDI 
+
+		0 @[id]@ INDI
 		1 SEX [gender]
 		1 NAME First /Last Name/
-		1 BIRT 
+		1 BIRT
 			2 DATE [date]
 			2 PLAC [place]
-		1 DEAT 
+		1 DEAT
 			2 DATE [date]
 			2 PLAC [place]
-		1 FAMC @F1@  (FAMily Child ) : famille 
+		1 FAMC @F1@  (FAMily Child ) : famille
 		1 FAMS @F1@  (FAMily Spouse) : famille par union pour les conjoins (parents ) (WIFE, HUSB) (femme et mari)
 		1 NOTE [note]
 		1 SOUR [source reference]
@@ -368,7 +368,7 @@ class GedcomWriter
         $txt = sprintf("0 @%s@ INDI\n", $person->id);
         $txt .= sprintf("1 NAME %s/%s/\n", $person->first, $person->last);
         $txt .= sprintf("1 SEX %s\n", $person->gender);
-        
+
         $birth = $person->birth;
 
         if ((trim($birth['place']) != '') || (trim($birth['date']) != '')) {
@@ -397,7 +397,7 @@ class GedcomWriter
             if (($src = $this->sourcesFindType('death', $person)) !== false) {
                 $txt .= sprintf("2 SOUR %s\n", $src);
             }
-                
+
         }
 
         // is the child of family
@@ -412,7 +412,7 @@ class GedcomWriter
                 #	$txt .= sprintf("2 SOUR %s\n", $src);
             }
         }
-        
+
         // remove lang=en and templ=mobile from url
         $url = new URL();
         $_url = $url->split(rawurldecode($person->url));
@@ -421,7 +421,7 @@ class GedcomWriter
 
         $txt .= sprintf("1 NOTE Source Geneanet : %s\n", $_url->build());
         # $txt .= sprintf("1 SOUR %s\n", $person->url);  # attributes starting with _ are ignored.
-        
+
         if (isset($person->notes)) {
             foreach ($person->notes as $n) {
                 $txt .= sprintf("1 NOTE %s\n", $n);
@@ -445,14 +445,14 @@ class GedcomWriter
 	 * Une famille peut aussi être monoparentale (union hétérosexuelle,dont un des conjoints est inconnu, à
 	 * l’origine d’une naissance). Dans ce cas, le parent connu doit être enregistré avec son enfant (CHIL) et
 	 * l’étiquette correspondant à son sexe : HUSB (père) ou WIFE (mère).
-	 * 
+	 *
 
-		0 @F2@ FAM 
+		0 @F2@ FAM
 			1 HUSB @P4@
 			1 WIFE @P3@
 			1 CHIL @P6@
 			1 CHIL @P1@
-			1 MARR 
+			1 MARR
 				2 DATE 28 octobre 1955,
 				2 PLAC Saint Denis de Gastines
 
@@ -474,9 +474,9 @@ class GedcomWriter
 
     protected function families($person)
     {
-        
+
         $txt = '';
-    
+
         foreach ($this->dict->getall(GedcomDictionary::FAMILIES) as $fam_id => $fam) {
             $txt .= sprintf("0 @%s@ FAM\n", $fam_id);
             $txt .= sprintf("1 HUSB @%s@\n", $fam['HUSB']->id);
@@ -518,7 +518,7 @@ class GedcomWriter
     {
         return '';
     }
-    
+
     // indent line with TABs for easy reading.
     public function pretty($lines, $separator = "\t")
     {
@@ -542,13 +542,13 @@ class GedcomWriter
             $lines = explode("\n", $lines);
         }
         $txt = '';
-        
+
         foreach ($lines as $line) {
             if (preg_match('#^\s*(\d+) (.*)#', $line, $values)) {
                 $txt .= sprintf("%s %s\n", $values[1], $values[2]);
             }
         }
-        
+
         return $txt;
     }
 }

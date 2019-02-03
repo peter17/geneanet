@@ -3,10 +3,10 @@
 namespace Geneanet;
 
 /*
- * 
+ *
  *  parse entry from Geneanet genealogy server
- * 
- * 
+ *
+ *
  */
 
 /* geany_encoding=ISO-8859-15 */
@@ -28,18 +28,17 @@ class GeneanetEntryParser
 
     public function __construct()
     {
-        
+
     }
-    
+
     public function parse($data_html, $url)
     {
-
         $person = new Person();
         $html = new \simple_html_dom($data_html);
 
         # incorect request
         if ($h1Tag = $html->find('h1', 1)) {
-            # printf("# ERR : incorrect request : '%s'\n", $h1Tag->plaintext);
+            printf("# ERR : incorrect request : '%s'\n", $h1Tag->plaintext);
             if ($h1Tag->plaintext == 'Incorrect request') {
                 return false;
             }
@@ -52,15 +51,20 @@ class GeneanetEntryParser
             return false;
         }
          */
-        $div = $html->find('div#tree_content h1,h2,ul,p,table');
+        $div = $html->find('h1,h2,ul,p,table,div#parents');
 
         $section = static::SECTION_INFO;
         foreach ($div as $e) {
             # printf("\n# section : %s / [%s] %s\n", $section, $e->tag, $this->encode($this->strLimit($e->plaintext)));
 
-            if ($e->tag == 'h2') {
+            if ($e->tag == 'h1') {
+                $person = $this->parseInfo($person, $e);
+            } elseif ($e->tag == 'ul') {
+                $person = $this->parseInfo($person, $e);
+                $person = $this->parseUnions($person, $e);
+            } elseif ($e->tag == 'h2') {
                 # printf("# %s / H2 : %s\n", $section, $e->plaintext);
-                
+
                 # Half-siblings
                 if (preg_match('/Half-siblings/i', $e->plaintext)) {
                     # printf("# match half-sibling\n");
@@ -94,7 +98,7 @@ class GeneanetEntryParser
                 #    # printf("# match sources\n");
                 #    $section = static::SECTION_RELATIONSHIPS;
                 #}
-                
+
                 # default section
                 elseif ($section == 'info') {
                     $person = $this->parseInfo($person, $e);
@@ -111,9 +115,9 @@ class GeneanetEntryParser
                     ));
                      */
                 }
-            
+
                 # printf("# nouvelle section : %s / H2 : %s\n", $section, $e->plaintext);
-                
+
             } else {
                 switch($section){
                     case static::SECTION_INFO:
@@ -123,7 +127,6 @@ class GeneanetEntryParser
                         if ($e->tag == 'p') {
                             break;
                         }
-
                         $person = $this->parseSiblings($person, $e);
                         break;
                     case static::SECTION_HALF_SIBLINGS:
@@ -145,10 +148,8 @@ class GeneanetEntryParser
                         if (preg_match('/Regular Version/', $e->innertext)) {
                             break;
                         }
-                        if (@count($person->unions) == 0) {
-                            # printf("##  unions : [%s] : %s \n", $e->tag, $e->innertext);
-                            $person = $this->parseUnions($person, $e);
-                        }
+                        # printf("##  unions : [%s] : %s \n", $e->tag, $e->innertext);
+                        $person = $this->parseUnions($person, $e);
                         break;
                     case static::SECTION_NOTES:
                         $person = $this->parseNotes($person, $e);
@@ -168,7 +169,7 @@ class GeneanetEntryParser
                 }
             }
         }
-        
+
         return $person;
     } /* parse (html) */
 
@@ -178,7 +179,7 @@ class GeneanetEntryParser
 
         # printf("# parseUnions(%s) : %s\n", $person->name(), $html->plaintext);
         # printf("code : %s\n", $html->innertext);
-        
+
         /* content :
          * ul
          *   li : union [parents]
@@ -187,20 +188,19 @@ class GeneanetEntryParser
          *    li : <img gender> <a href="">child2</a> with ...
          *   /ul
          * /ul
-         * 
+         *
          * plaintext :
-         *  - Married [date], [place], to [person] 1967 (Parents : )  with   
+         *  - Married [date], [place], to [person] 1967 (Parents : )  with
          *    - [person] [date]
          *    - [person] [date]
-         * 
+         *
          *  exception :
-         * 
-         *   Married to x x with 
+         *
+         *   Married to x x with
          *    - x x
          */
-         
+
          // TODO : get extra information for unions (date and place).
-        
         foreach ($html->find('li') as $li) {
             if (!preg_match('#.*li/ul/li$#', $this->nodePath($li, false))) {
                 $union = array(
@@ -210,6 +210,8 @@ class GeneanetEntryParser
                 if ($a = $li->find('a', 0)) {
                     $union['name'] = $this->encode($this->replaceNbsp($a->plaintext));
                     $union['url'] = $a->href;
+                } else {
+                    continue;
                 }
 
                 # childs
@@ -229,11 +231,11 @@ class GeneanetEntryParser
                         'gender'  => $gender
                      );
                 }
-                
+
                 $person->push('unions', $union);
             }
         }
-        
+
         return $person;
     }
 
@@ -323,7 +325,7 @@ class GeneanetEntryParser
         # printf("# parseHalfSiblings() : [%s] / %s : %s\n", $html->tag, $this->nodePath($html), $html->plaintext);
 
         $half = array();
-        
+
         $count = 0;
         while ($anchor = $html->find('a', $count)) {
             # printf("# half-siblings  $count : %s (%s)\n", $anchor->plaintext, $anchor->href);
@@ -344,7 +346,7 @@ class GeneanetEntryParser
                     );
                     break;
             }
-            
+
             $count++;
         }
 
@@ -356,11 +358,14 @@ class GeneanetEntryParser
     public function parseParents($person, $html)
     {
         $count = 0;
-        while ($anchor = $html->find('a', $count)) {
+        foreach ($html->find('a') as $anchor) {
             $person->push('parents', array(
               'name' => $this->encode($anchor->plaintext),
               'url'  => $anchor->href));
             $count++;
+            if ($count >= 2) {
+                break;
+            }
         }
 
         return $person;
@@ -368,7 +373,6 @@ class GeneanetEntryParser
 
     public function parseInfo($person, $html)
     {
-
         # printf("# parseInfo() : [%s]\n", $html->tag);
 
         # <img src="http://static.geneanet.org/arbre/img/man.png" alt="H" title="H" />&nbsp;
@@ -379,7 +383,7 @@ class GeneanetEntryParser
             if ($img = $html->find('img', 0)) {
                 $person->gender = strtoupper($img->title);
             }
-            
+
             # firstname
             if ($img = $html->find('a', 0)) {
                 $person->first = trim($this->encode($img->plaintext));
@@ -391,7 +395,7 @@ class GeneanetEntryParser
 
         } else {
             $list = $html->find('li');
-            
+
             foreach ($list as $e) {
                 $txt = trim(html_entity_decode($this->replaceNbsp($e->plaintext)));
 
@@ -506,7 +510,7 @@ class GeneanetEntryParser
     public function nodePath($html, $full = true)
     {
         $list = array();
-        
+
         $pTag = $html;
         while ($pTag->tag != 'root') {
             if ($full && isset($pTag->class)) {

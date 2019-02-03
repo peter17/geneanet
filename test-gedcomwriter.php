@@ -28,7 +28,7 @@ if ($config->get('connexion/proxy') != '') {
     $grabber->setProxy($config->get('connexion/proxy'));
 }
 
-$test = 'descendants';
+$test = 'ascendants';
 
 switch($test) {
 
@@ -39,7 +39,7 @@ switch($test) {
 
     case 'ascendants':
         $p = $grabber->grabSingle($url);
-        $grabber->grabAscendants($p, $level = 3);
+        $grabber->grabAscendants($p, $level = 15);
         break;
 
     case 'descendants':

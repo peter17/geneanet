@@ -6,10 +6,10 @@ namespace Geneanet;
 
 class Grabber
 {
-    
+
     protected $geneanet;
-    protected $delay = 1;
-    
+    protected $delay = 60;
+
     // will force this args in request (url).
     protected $geneanet_args = array(
         'lang' => 'en',
@@ -29,7 +29,7 @@ class Grabber
         $url = $this->url->enforceParams($url, $this->geneanet_args);
 
         $html = $this->urlGrabCached($url);
-        
+
         if ($html == false) {
             return false;
         }
@@ -42,7 +42,7 @@ class Grabber
 
     public function grabDescendants($person, $level = 3, $indent = 0)
     {
-        
+
         # printf("# grabDescendants(%s, %s)\n", $level, utf8_decode($person->name()));
 
         if ($level == 0) {
@@ -64,9 +64,9 @@ class Grabber
         }
     }
 
-    public function grabAscendants($person, $level = 3)
+    public function grabAscendants($person, $level = 10)
     {
-        
+
         # printf("# grabParents(%s) %s\n", $level, $person->quickDisplay());
 
         if ($level == 0) {
@@ -75,7 +75,7 @@ class Grabber
 
         $parents = $person->parents;
         $_parents = array();
-        
+
         if (isset($parents[0]['url'])) {
             $url = $this->makeUrl($person->url, $parents[0]);
             $person1 = $this->grabSingle($url);
@@ -84,9 +84,9 @@ class Grabber
         }
         if (isset($parents[1]['url'])) {
             $url = $this->makeUrl($person->url, $parents[1]);
-            $person1 = $this->grabSingle($url);
-            $_parents[1] = $person1;
-            $this->grabAscendants($person1, $level-1);
+            $person2 = $this->grabSingle($url);
+            $_parents[1] = $person2;
+            $this->grabAscendants($person2, $level-1);
         }
         printf(
             " %s - (%d) %s\n",
@@ -98,7 +98,7 @@ class Grabber
         $person->set('parents', $_parents);
 
     }
-    
+
     public function grabUnions($person)
     {
         return $this->grabUnionsAndChilds($person);
@@ -106,7 +106,7 @@ class Grabber
 
     public function grabUnionsAndChilds($person)
     {
-        
+
         # printf("# grabUnionsAndChilds(%s) / %s\n", utf8_decode($person->name()), $person->url);
 
         $unions = $person->unions;
@@ -121,23 +121,23 @@ class Grabber
             $_union['self'] = $person;
             $_union['spouse'] = $this->grabSingle($url);
             $_union['childs'] = array();
-            
+
             if (isset($u['childs'])) {
                 foreach ($u['childs'] as $c) {
                     $url = $this->makeUrl($person->url, $c);
                     $_union['childs'][] = $this->grabSingle($url);
                 }
             }
-            
+
             $_unions[] = $_union;
         }
-        
+
         return $_unions;
     }
 
     public function grabSiblings($person)
     {
-        
+
         # printf("# grabSiblings(%s) / %s\n", utf8_decode($person->name()), $person->url);
 
         $list = array();
@@ -150,13 +150,13 @@ class Grabber
             $url = $this->makeUrl($person->url, $s);
             $list[] = $this->grabSingle($url);
         }
-        
+
         return $list;
     }
 
     public function grabHalfSiblings($person)
     {
-        
+
         # printf("# grabHalfSiblings(%s) / %s\n", utf8_decode($person->name()), $person->url);
 
         $list = array();
@@ -169,7 +169,7 @@ class Grabber
             $url = $this->makeUrl($person->url, $s);
             $list[] = $this->grabSingle($url);
         }
-        
+
         return $list;
     }
 
@@ -190,7 +190,16 @@ class Grabber
 
         $html = $this->urlGrab($url);
 
-        file_put_contents("var/cache/" . $md5 . '.html', $html);
+        if (strpos('Log in to Geneanet', $html) === -1) {
+
+            file_put_contents($cache, $html);
+
+        } else {
+
+            shell_exec("curl -G '$url' -o $cache");
+
+            return file_get_contents($cache);
+        }
 
         return $html;
     }
@@ -241,7 +250,7 @@ class Grabber
     {
         $this->geneanet->setProxy($proxy);
     }
-    
+
     protected function delay($sec = null)
     {
         if ($sec == null) {
@@ -249,7 +258,7 @@ class Grabber
         }
         sleep($sec);
     }
-    
+
     /* won't go under 1 second between each request */
     public function setDelay($sec)
     {
